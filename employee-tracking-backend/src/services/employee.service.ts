@@ -52,7 +52,7 @@ export class EmployeeService {
         }
 
         const employees = await User.find(query)
-            .select('name email employeeId isActive createdAt')
+            .select('_id name email employeeId role isActive createdAt updatedAt')
             .sort({ createdAt: -1 })
             .lean();
 
@@ -67,7 +67,7 @@ export class EmployeeService {
         const employee = await User.findOne({
             _id: id,
             role: ROLES.EMPLOYEE,
-        }).select('name email employeeId isActive createdAt updatedAt');
+        }).select('_id name email employeeId role isActive createdAt updatedAt').lean();
 
         if (!employee) {
             throw new Error(ERROR_MESSAGES.EMPLOYEE_NOT_FOUND);

@@ -26,6 +26,14 @@ class ApiClient {
         if (typeof window !== 'undefined') {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+        }
+    }
+
+    // Sync token from localStorage (useful after page reload)
+    syncToken() {
+        if (typeof window !== 'undefined') {
+            this.accessToken = localStorage.getItem('accessToken');
         }
     }
 
@@ -38,8 +46,13 @@ class ApiClient {
             ...options.headers,
         };
 
-        if (this.accessToken) {
-            headers['Authorization'] = `Bearer ${this.accessToken}`;
+        // Always get the latest token from localStorage
+        const token = typeof window !== 'undefined' 
+            ? localStorage.getItem('accessToken') 
+            : this.accessToken;
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
         const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -50,6 +63,13 @@ class ApiClient {
         const data = await response.json();
 
         if (!response.ok) {
+            // If unauthorized, clear tokens
+            if (response.status === 401) {
+                this.clearTokens();
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('user');
+                }
+            }
             throw new Error(data.message || `HTTP ${response.status}`);
         }
 
@@ -59,27 +79,38 @@ class ApiClient {
 
     // Auth endpoints
     async login(data: LoginRequest): Promise<LoginResponse> {
-        const response = await this.request<any>('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
+        // Don't send token for login request
+        const tempToken = this.accessToken;
+        this.accessToken = null;
 
-        // Handle flat structure returned by backend { user, accessToken, refreshToken }
-        // The request method above now unwraps 'data', so 'response' here is the inner object
-        const result: LoginResponse = {
-            user: response.user,
-            tokens: {
-                accessToken: response.accessToken,
-                refreshToken: response.refreshToken
+        try {
+            const response = await this.request<any>('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify(data),
+            });
+
+            // Handle response structure: backend returns { success, message, data: { user, accessToken, refreshToken } }
+            const loginData = response;
+            
+            const result: LoginResponse = {
+                user: loginData.user,
+                tokens: {
+                    accessToken: loginData.accessToken,
+                    refreshToken: loginData.refreshToken
+                }
+            };
+
+            // Save tokens
+            this.setAccessToken(result.tokens.accessToken);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('refreshToken', result.tokens.refreshToken);
             }
-        };
 
-        this.setAccessToken(result.tokens.accessToken);
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('refreshToken', result.tokens.refreshToken);
+            return result;
+        } finally {
+            // Restore token if login fails
+            this.accessToken = tempToken;
         }
-
-        return result;
     }
 
     async logout() {
