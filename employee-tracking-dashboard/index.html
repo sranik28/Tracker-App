@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Employee Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+
+<body class="dashboard-page">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <h1>📍 Employee Tracker Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Connecting...</span>
+            </div>
+            <div class="user-info">
+                <span id="adminName">Admin</span>
+            </div>
+            <button class="btn-logout" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <div class="stat-value" id="totalEmployees">0</div>
+                <div class="stat-label">Total Employees</div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-success">
+            <div class="stat-icon">🟢</div>
+            <div class="stat-content">
+                <div class="stat-value" id="trackingCount">0</div>
+                <div class="stat-label">Currently Tracking</div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+            <div class="stat-icon">🔴</div>
+            <div class="stat-content">
+                <div class="stat-value" id="offlineCount">0</div>
+                <div class="stat-label">Offline</div>
+            </div>
+        </div>
+
+        <div class="stat-card stat-info">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <div class="stat-value" id="todaySessions">0</div>
+                <div class="stat-label">Today's Sessions</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Employee List Panel -->
+        <aside class="employee-panel">
+            <div class="panel-header">
+                <h2>Employees</h2>
+                <div class="panel-actions">
+                    <button class="btn-filter active" data-filter="all">All</button>
+                    <button class="btn-filter" data-filter="tracking">Tracking</button>
+                    <button class="btn-filter" data-filter="offline">Offline</button>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchEmployee" placeholder="Search employees...">
+            </div>
+
+            <div class="employee-list" id="employeeList">
+                <div class="loading-state">
+                    <div class="loader"></div>
+                    <p>Loading employees...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map View -->
+        <main class="map-container">
+            <div id="map"></div>
+            <div class="map-controls">
+                <button class="btn-map-control" id="centerMapBtn" title="Center on employees">
+                    🎯 Center
+                </button>
+                <button class="btn-map-control" id="refreshBtn" title="Refresh data">
+                    🔄 Refresh
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Socket.IO Client -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <!-- Dashboard Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/socket.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>
